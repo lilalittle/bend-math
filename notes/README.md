@@ -9,6 +9,18 @@ grows by following those links and writing the note that should exist.
 - [Learning path](learning-path.md) — the ordered curriculum, easiest first
 - [The RCCM connection](rccm-connection.md) — why any of this matters to the mission
 
+## From the frontend
+
+The math you already know, made explicit — start here if your background is
+JS/TS, CSS, and SVG rather than textbooks.
+
+- [Mathematics, for a frontend engineer](frontend-math.md) — the translation dictionary: shared concepts, and where programming and math diverge
+- [What algebra is](algebra.md) — from solving 2x+3=7 to groups, rings, and fields
+- [Angles, circles, and why radians](trigonometry.md) — cos/sin as coordinates, radians as arc length
+- [Vectors and matrices](vectors-matrices.md) — arrows, arrays, and functions on vectors
+- [The mathematics inside CSS](css-math.md) — transforms, perspective, easing, color
+- [SVG math](svg-math.md) — viewBox mappings, path arcs, dash animation, filters
+
 ## Foundations
 
 - [Differential forms](differential-forms.md) — numbers pinned to points, paths, patches, volumes

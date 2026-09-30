@@ -22,3 +22,4 @@ Z/2 is the cheapest coefficients that tell the truth.
 
 - [d² = 0](d2-zero.md) — the theorem this justifies
 - [Differential forms](differential-forms.md) — forms can take coefficients in any ring
+- [What algebra is](algebra.md) — Z/2 is the smallest field; XOR is its addition

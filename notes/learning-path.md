@@ -4,6 +4,13 @@ The curriculum: learn advanced mathematics and physics *as a side effect of
 formalizing them*. Work each rung with [the RGR loop](rgr-loop.md) — red, green,
 refactor — and let the issues below track the frontier.
 
+**Rung 0 — where you already stand.** If your math background is computer
+graphics and web work rather than textbooks, start with the frontend bridge:
+[Mathematics, for a frontend engineer](frontend-math.md),
+[what algebra is](algebra.md), [vectors and matrices](vectors-matrices.md),
+[the mathematics inside CSS](css-math.md). You know more than you think —
+it's just never been called by its real names.
+
 1. **[d² = 0](d2-zero.md)** — exterior algebra, the seed of everything. Done:
    [`playground/d2-zero/`](../playground/d2-zero/).
 2. **Vector calculus identities** — div(curl F) = 0, curl(grad f) = 0, over exact
