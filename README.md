@@ -35,6 +35,16 @@ Break something in `Expr.bend` (e.g. the product rule in `diff`) and re-run
 2. Implement in `Expr.bend`, prove in `PROOF.bend` — the AI writes these.
 3. `bend PROOF.bend` is the gate. Refactor freely; the gate catches breakage.
 
+## RGR step zero: d² = 0
+
+`rgr-step-zero/` demonstrates the full **red → green → refactor** loop on the
+smallest non-vacuous model of d² = 0 (the seed of Stokes' theorem): a single
+triangle over Z/2. Red states the law with `?TODO` (gate fails honestly);
+green proves it by 8-case brute force; refactor extracts the pure-algebra lemma
+`xor_cancel3` from the geometry, guarded by the checker. Includes the
+RED/GREEN/REFACTOR checker transcripts. Start here if you're new — it's the
+first rung of the [learning path](https://github.com/lilalittle/bend-packages/issues/86).
+
 ## Proof-style notes (Bend 2.0.27)
 
 - The pair must be *literally* named `LAWS.bend` / `PROOF.bend`. `PROOF.bend`
