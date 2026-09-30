@@ -54,4 +54,5 @@ honestly.
 - [Vectors and matrices](vectors-matrices.md) — the machinery behind every transform
 - [Angles and circles](trigonometry.md) — radians, turns, and why
 - [SVG math](svg-math.md) — the same matrices in `transform` attributes and filters
+- [Affine: one word, three ideas](affine.md) — CSS transforms are affine maps (minus perspective)
 - [Mathematics, for a frontend engineer](frontend-math.md) — the translation dictionary

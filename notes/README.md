@@ -21,6 +21,11 @@ JS/TS, CSS, and SVG rather than textbooks.
 - [The mathematics inside CSS](css-math.md) — transforms, perspective, easing, color
 - [SVG math](svg-math.md) — viewBox mappings, path arcs, dash animation, filters
 
+## The language
+
+- [Why Bend is cool](why-bend-is-cool.md) — interaction nets + affine types = parallelism without locks or kernels
+- [Affine: one word, three ideas](affine.md) — affine maps, combinations, spaces, and types
+
 ## Foundations
 
 - [Differential forms](differential-forms.md) — numbers pinned to points, paths, patches, volumes

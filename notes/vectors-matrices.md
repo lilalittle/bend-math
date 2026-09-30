@@ -38,4 +38,5 @@ translation. CSS `matrix3d(...)` is exactly this — 16 numbers, column-major
 - [The mathematics inside CSS](css-math.md) — `matrix()`, `matrix3d()`, transform order
 - [SVG math](svg-math.md) — `feColorMatrix` is a matrix on RGBA vectors
 - [Angles and circles](trigonometry.md) — where rotation matrices come from
+- [Affine: one word, three ideas](affine.md) — x ↦ Ax + b, and use-at-most-once
 - [What algebra is](algebra.md) — linear algebra is algebra with vector-shaped numbers
