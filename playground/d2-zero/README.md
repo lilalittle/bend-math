@@ -1,4 +1,4 @@
-# RGR step zero: d² = 0 on a triangle
+# d² = 0 on a triangle (RGR step zero)
 
 The complete red → green → refactor loop for proof-driven development in Bend 2,
 demonstrated on the smallest non-vacuous model of **d² = 0** — the seed of Stokes' theorem.
