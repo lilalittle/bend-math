@@ -35,6 +35,15 @@ Break something in `Expr.bend` (e.g. the product rule in `diff`) and re-run
 2. Implement in `Expr.bend`, prove in `PROOF.bend` — the AI writes these.
 3. `bend PROOF.bend` is the gate. Refactor freely; the gate catches breakage.
 
+## Notes garden
+
+`notes/` is a second brain for the mathematics behind this repo — interlinked
+notes on differential forms, the exterior derivative, d² = 0, Stokes' theorem,
+the divergence theorem, the RGR loop, and the learning path from here to
+formalized physics. Start at [`notes/README.md`](notes/README.md) and follow
+whatever catches your curiosity; grow the garden by writing the note that
+should exist.
+
 ## Playground: d² = 0
 
 `playground/d2-zero/` demonstrates the full **red → green → refactor** loop on the
