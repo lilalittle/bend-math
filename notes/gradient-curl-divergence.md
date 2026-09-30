@@ -21,9 +21,13 @@ The two great identities are [d² = 0](d2-zero.md) wearing overalls:
 - **div(curl F) = 0** — a swirl has no source. What flows into any bubble flows
   back out; the field just goes around.
 
-These are the workhorses of field theory — and the target of
-[bend-packages#68](https://github.com/lilalittle/bend-packages/issues/68),
-the next rung after the playground.
+These are the workhorses of field theory — and as of rung 2, they're proved:
+[`playground/vector-identities/`](../playground/vector-identities/) proves all
+three over Z/2 — curl(grad f) = 0 on a triangle face (8 cases, the d² = 0
+shape), div(curl F) = 0 on a tetrahedron (64 cases: each of the 6 edges borders
+exactly 2 of the 4 faces), and div(grad f) = Δf with the Laplacian shown
+independent of edge-orientation convention. The reusable algebra was extracted
+to `Algebra.bend`.
 
 ## See also
 

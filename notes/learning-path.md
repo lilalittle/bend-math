@@ -14,9 +14,17 @@ it's just never been called by its real names.
 1. **[d² = 0](d2-zero.md)** — exterior algebra, the seed of everything. Done:
    [`playground/d2-zero/`](../playground/d2-zero/).
 2. **Vector calculus identities** — div(curl F) = 0, curl(grad f) = 0, over exact
-   types. The algebraic core of field theory.
+   types. The algebraic core of field theory. Done:
+   [`playground/vector-identities/`](../playground/vector-identities/) —
+   discrete grad/curl/div over Z/2 on a triangle and tetrahedron, full RGR
+   cycle; the algebra lemmas extracted to `Algebra.bend`. The 64-case
+   brute force is honest motivation for proof automation.
    ([issue](https://github.com/lilalittle/bend-packages/issues/68))
 3. **Physical dimensions and units** — dimensional analysis as type-checking.
+   🔴 RED started: [`playground/units/`](../playground/units/) — dimensions as
+   7-exponent SI vectors (num/den Nat pairs, `is Data`), four laws stated
+   (`?TODO`), including (m/s)·s = m via a specified-but-unimplemented
+   `dim_norm`. GREEN is the next session's work.
    ([issue](https://github.com/lilalittle/bend-packages/issues/69))
 4. **[The divergence theorem](divergence-theorem.md)** (discrete) — what Stokes
    says, finitely. Turns the RCCM boundary gap into a failing law.
