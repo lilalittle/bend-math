@@ -22,6 +22,15 @@ It builds directly on [d² = 0](d2-zero.md) and the
 once those are proved, the discrete divergence theorem is the natural next
 green. And it's the formal shape of [the RCCM boundary gap](rccm-connection.md).
 
+**Proved:** [`playground/divergence-theorem/`](../playground/divergence-theorem/)
+proves the smallest non-vacuous instance — two cubes sharing one face, Z/2
+coefficients. `div` on a cube is the XOR over its 6 faces; summing both
+divergences, the shared face's value appears twice and cancels, leaving exactly
+the flux through the 10 outer faces. The whole proof is `(s+A)+(s+B) = A+B` by
+case-splitting on the shared face. One law, green, full RGR cycle with
+transcripts. The general cubical complex is the same argument iterated: every
+interior face is incident to exactly 2 cubes.
+
 ## See also
 
 - [Stokes' theorem](stokes-theorem.md) — the general statement

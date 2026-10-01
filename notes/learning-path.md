@@ -32,6 +32,10 @@ it's just never been called by its real names.
    ([issue](https://github.com/lilalittle/bend-packages/issues/69))
 4. **[The divergence theorem](divergence-theorem.md)** (discrete) — what Stokes
    says, finitely. Turns the RCCM boundary gap into a failing law.
+   🟢 GREEN, 🔵 refactored: [`playground/divergence-theorem/`](../playground/divergence-theorem/) —
+   two cubes sharing a face over Z/2; the shared face cancels out of the
+   summed divergences, leaving the outer-boundary flux. The RCCM gap is now
+   an explicit open law (`rccm_boundary_check`) against it.
    ([issue](https://github.com/lilalittle/bend-packages/issues/84))
 5. **Verified integers and rationals** — what numbers are, constructively.
    ([issue](https://github.com/lilalittle/bend-packages/issues/70))

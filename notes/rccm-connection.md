@@ -18,10 +18,17 @@ chain from the bottom: every note is a rung between "I want to formalize this
 physics" and "the machine agrees."
 
 **The concrete bridge:** [bend-packages#84](https://github.com/lilalittle/bend-packages/issues/84)
-(the discrete divergence theorem) is blocked only by d² = 0 and the vector
-calculus identities. Finish those two approachable leaves and rccm#3 turns from
-prose into a *failing law* — the exact theory-gap-as-failing-law pattern the
-mission wants.
+(the discrete divergence theorem) was blocked only by d² = 0 and the vector
+calculus identities — both now proved, and #84 with them
+([`playground/divergence-theorem/`](../playground/divergence-theorem/): two
+cubes sharing a face, the shared face cancelling out of the summed
+divergences). So rccm#3's prose now has a precise open law to aim at,
+`rccm_boundary_check`: with RCCM's definitions of cavity charge `Q(V)` and
+boundary flux `Φ(∂V)`, prove `{Q(V) == Φ(∂V)}` — the discrete proof is the
+template (sum over cells, interior couplings cancel, read off the boundary).
+It stays open because RCCM's charge/flux aren't Z/2 face-values: porting them
+needs verified numbers (rungs 5+) and RCCM's own coupling definitions. The
+theory-gap-as-failing-law pattern now has its first concrete instance.
 
 ## See also
 
