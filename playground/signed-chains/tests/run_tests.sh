@@ -1,8 +1,8 @@
 #!/bin/bash
 # tests/run_tests.sh -- regression harness for ../verify.sh.
 #
-# Reconstructs the nine fault-injection scenarios from the audit transcript
-# (plus two reviewer-flagged follow-ups) using controlled `bend` test
+# Reconstructs the fault-injection scenarios from the audit transcript
+# (plus reviewer-flagged follow-ups) using controlled `bend` test
 # doubles, runs the repaired runner against each, and asserts the expected
 # classification + runner exit code.
 #
@@ -108,7 +108,7 @@ check() {
 
 REAL_BASE_DIGEST="90a4a9a4ec3997d7d4927d7dac04f9ddd3b884e6521ac9d691bfe6765ba0d4d7"
 
-echo "=== verify.sh regression tests (9 fault-injection scenarios) ==="
+echo "=== verify.sh regression tests (fault-injection scenarios) ==="
 
 # 1. baseline success
 FAKE_VERSION="bend 2.0.27" FAKE_BASE_MODE=real FAKE_VERDICT_FLAG=0 \
@@ -175,18 +175,49 @@ FAKE_ORDINARY_STDOUT='All terms check.\n' FAKE_ORDINARY_EXIT=0 \
 unset SKIP_EVIDENCE_CHECK
 
 # 8. bend --help itself fails -> TOOL/RESOURCE FAILURE (never UNSUPPORTED),
-#    nonzero exit
-FAKE_VERSION="bend 2.0.27" FAKE_BASE_MODE=real FAKE_VERDICT_FLAG=0 FAKE_HELP_EXIT=3 \
-FAKE_ORDINARY_STDOUT='All terms check.\n' FAKE_ORDINARY_EXIT=0 \
-  check help_command_fails 1 \
-    "ordinary: PASS (exit=0)" \
-    "kernel (--verdict): TOOL/RESOURCE FAILURE (bend --help failed, exit=3"
-# extra assertion: a failed --help is not labeled UNSUPPORTED
-if printf '%s' "$LAST_OUT" | grep -q "UNSUPPORTED"; then
-  FAIL_COUNT=$((FAIL_COUNT + 1)); printf 'FAIL  %-28s %s\n' "help_not_unsupported" "failed --help was labeled UNSUPPORTED"
-else
-  PASS_COUNT=$((PASS_COUNT + 1)); printf 'PASS  %-28s %s\n' "help_not_unsupported" "no UNSUPPORTED for failed --help"
-fi
+#    nonzero exit. The failed capability discovery is TERMINAL: the kernel
+#    gate must not run (zero invocations), and the help failure with its
+#    exit code must be preserved verbatim in the final summary.
+#    Three kernel-double variants (unknown-option diagnostic, success text,
+#    empty exit 0) must all produce the identical terminal result -- the
+#    classification cannot be overwritten by a later kernel outcome.
+help_failed_kernel_variant() {
+  local kdesc="$1"; shift
+  FAKE_VERSION="bend 2.0.27" FAKE_BASE_MODE=real FAKE_VERDICT_FLAG=0 FAKE_HELP_EXIT=3 \
+  FAKE_ORDINARY_STDOUT='All terms check.\n' FAKE_ORDINARY_EXIT=0 \
+    check "help_fails_k_${kdesc}" 1 \
+      "ordinary: PASS (exit=0)" \
+      "kernel (--verdict): TOOL/RESOURCE FAILURE (bend --help failed, exit=3" \
+      "kernel      : TOOL/RESOURCE FAILURE (bend --help failed, exit=3"
+  # zero kernel invocations: the kernel gate must not have run at all
+  if [ -e "$LAST_EVDIR/kernel.exit" ] || [ -e "$LAST_EVDIR/kernel.stdout" ] || [ -e "$LAST_EVDIR/kernel.stderr" ]; then
+    FAIL_COUNT=$((FAIL_COUNT + 1)); printf 'FAIL  %-28s %s\n' "help_no_kernel_${kdesc}" "kernel gate ran despite failed --help"
+  else
+    PASS_COUNT=$((PASS_COUNT + 1)); printf 'PASS  %-28s %s\n' "help_no_kernel_${kdesc}" "zero kernel invocations"
+  fi
+  # the failed help must not be relabeled UNSUPPORTED anywhere in the output
+  if printf '%s' "$LAST_OUT" | grep -q "UNSUPPORTED"; then
+    FAIL_COUNT=$((FAIL_COUNT + 1)); printf 'FAIL  %-28s %s\n' "help_not_unsupported_${kdesc}" "failed --help was labeled UNSUPPORTED"
+  else
+    PASS_COUNT=$((PASS_COUNT + 1)); printf 'PASS  %-28s %s\n' "help_not_unsupported_${kdesc}" "no UNSUPPORTED for failed --help"
+  fi
+  # the help failure evidence itself must be captured (exit code preserved)
+  if [ -f "$LAST_EVDIR/help.exit" ] && [ "$(cat "$LAST_EVDIR/help.exit")" = "3" ]; then
+    PASS_COUNT=$((PASS_COUNT + 1)); printf 'PASS  %-28s %s\n' "help_exit_preserved_${kdesc}" "help exit=3 in evidence"
+  else
+    FAIL_COUNT=$((FAIL_COUNT + 1)); printf 'FAIL  %-28s %s\n' "help_exit_preserved_${kdesc}" "help exit code not preserved"
+  fi
+}
+# variant A: kernel double would have reported an unknown-option diagnostic
+FAKE_KERNEL_STDOUT='' FAKE_KERNEL_STDERR='unknown option: --verdict\n' FAKE_KERNEL_EXIT=1 \
+  help_failed_kernel_variant "unknown_option"
+# variant B: kernel double would have reported success
+FAKE_KERNEL_STDOUT='All terms check.\n' FAKE_KERNEL_STDERR='' FAKE_KERNEL_EXIT=0 \
+  help_failed_kernel_variant "success"
+# variant C: kernel double would have exited 0 with no output
+FAKE_KERNEL_STDOUT='' FAKE_KERNEL_STDERR='' FAKE_KERNEL_EXIT=0 \
+  help_failed_kernel_variant "empty_exit0"
+unset FAKE_KERNEL_STDOUT FAKE_KERNEL_STDERR FAKE_KERNEL_EXIT
 
 # 9. failure marker only on stderr with zero exit -> FAIL (markers are
 #    scanned on both streams, not stdout alone)

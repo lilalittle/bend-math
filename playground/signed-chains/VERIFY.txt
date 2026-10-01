@@ -2,7 +2,7 @@
 bend version: bend 2.0.27
 bend binary : /home/hatch/.bend/bin/bend
 base.bend   : 90a4a9a4ec3997d7d4927d7dac04f9ddd3b884e6521ac9d691bfe6765ba0d4d7  (/home/hatch/.bend/bend2/base.bend)
-revision    : 2070187a1e8430b40dd87f844fa8d2be34277ac2
+revision    : 5e8cd475f8c3ac87039700d258d3ed9e94d4c7cd
 dirty state : DIRTY
 checked blobs (git blob-id path):
   122980f9f5dd101d71394391e3b18149bbda8f49 workspace/bend-math/playground/signed-chains/Algebra.bend
@@ -12,10 +12,10 @@ checked blobs (git blob-id path):
   664d9775a0beb5ec402190a5f24c0eabf6ab4fc9 workspace/bend-math/playground/signed-chains/README.md
   c75bafed58cd141c0b92a24518f3a4bffa79c58b workspace/bend-math/playground/signed-chains/RED.txt
   8c1fe07288eaf3b2bda63ee9b040c234dcc5a498 workspace/bend-math/playground/signed-chains/REFACTOR.txt
-  3f45ac578693a80a75e1e7162c1410715b677896 workspace/bend-math/playground/signed-chains/VERIFY.txt
-  50aa29816198912d6f69f6fa1db77b800718de33 workspace/bend-math/playground/signed-chains/tests/run_tests.sh
-  2a8882a1c09b4cd0386a1e34b9a16ccdd111785f workspace/bend-math/playground/signed-chains/verify.sh
+  410c697a277599e6be394606047978c513112e2b workspace/bend-math/playground/signed-chains/VERIFY.txt
+  ba5198c847ac48d3810ed9ecf8ac90e85ebc8c52 workspace/bend-math/playground/signed-chains/tests/run_tests.sh
+  c7f29921d592864176a31039da6e716d3614a9c7 workspace/bend-math/playground/signed-chains/verify.sh
 ordinary    : PASS (exit=0)
 kernel      : UNSUPPORTED (pinned bend 2.0.27 has no --verdict flag; established from --help, not from execution)
-evidence dir: /tmp/signed-chains-verify.ZB5BimuI
+evidence dir: /tmp/signed-chains-verify.B4ME08OE
 runner exit : 0

@@ -161,7 +161,11 @@ else
   KERNEL_SUPPORTED=0
 fi
 
-if [ -z "$KERNEL_RESULT" ] && [ "$KERNEL_SUPPORTED" -eq 0 ]; then
+if [ -n "$KERNEL_RESULT" ]; then
+  # Capability discovery already failed. Preserve that terminal result;
+  # do not attempt a kernel invocation or overwrite its classification.
+  :
+elif [ "$KERNEL_SUPPORTED" -eq 0 ]; then
   KERNEL_RESULT="UNSUPPORTED (pinned $PINNED_BEND_VERSION has no --verdict flag; established from --help, not from execution)"
   echo "kernel (--verdict): $KERNEL_RESULT"
 else
