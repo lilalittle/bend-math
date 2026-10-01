@@ -61,9 +61,26 @@ shadow is established, not assumed.
 
 ## Reproduce
 
-Run `./verify.sh` from this directory. It prints the pinned toolchain
-identifiers, the ordinary gate result, and the (unavailable) kernel-check
-result separately -- never flattened into a single "verified".
+Run `./verify.sh` from this directory (executable bit is committed: mode
+100755). It **enforces** the pinned toolchain before anything else -- exact
+`bend 2.0.27` version match and Base sha256 match, with an explicit nonzero
+exit on mismatch -- then runs the ordinary gate and determines kernel-check
+capability separately from execution.
+
+Gate contract: ordinary PASS requires **both** checker exit 0 **and** the
+recognized clean verdict `All terms check.` in stdout, with no failure
+markers. Success-shaped output with nonzero exit, open-obligation (`?TODO`)
+text, and stderr-only diagnostics can never become PASS; any failed required
+gate yields a nonzero runner exit. Kernel `--verdict` is recorded
+UNSUPPORTED only from capability evidence (2.0.27's `--help` has no such
+flag); crashes/timeouts/proof failures are tool/resource failures and fail
+closed -- never flattened into UNSUPPORTED.
+
+Every run stores raw unmodified stdout, stderr, and exit code per invocation
+in a per-run evidence directory (printed by the runner), and regenerates
+`VERIFY.txt` from that run's evidence. Regression tests:
+`./tests/run_tests.sh` replays the seven fault-injection scenarios against
+the runner with controlled checker doubles.
 
 ## See also
 
