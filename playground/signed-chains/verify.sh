@@ -1,9 +1,17 @@
 #!/bin/bash
 # verify.sh -- the one reproducible command for playground/signed-chains.
 #
-# Prints pinned toolchain identifiers, ENFORCES them (exact version and Base
-# digest match, nonzero exit on mismatch), runs the ordinary Bend proof gate,
-# then determines kernel-check capability SEPARATELY from execution.
+# Prints the SELECTED toolchain profile's identifiers, ENFORCES them (exact
+# version and Base digest match, nonzero exit on mismatch), runs the ordinary
+# Bend proof gate, then determines kernel-check capability SEPARATELY from
+# execution.
+#
+# Profiles (profiles/bend-<version>.sh, selected via BEND_PROFILE):
+#   unset | pinned | 2.0.27  -> bend-2.0.27.sh (the DEFAULT pin)
+#   candidate | 2.0.34       -> bend-2.0.34.sh (explicitly selected candidate)
+# Each profile declares its own versioned reporting contract (clean-verdict
+# string, failure markers) and kernel capability expectation. The default
+# pin is unchanged by the candidate profile's existence.
 #
 # Gate contract (ordinary):
 #   PASS requires BOTH: checker exit status 0 AND the pinned version's
@@ -49,11 +57,23 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 # ---------------------------------------------------------------- pins ----
-PINNED_BEND_VERSION="bend 2.0.27"
-PINNED_BASE_SHA256="90a4a9a4ec3997d7d4927d7dac04f9ddd3b884e6521ac9d691bfe6765ba0d4d7"
-CLEAN_VERDICT="All terms check."
-# Failure markers the pinned checker emits; their presence voids any PASS.
-FAILURE_MARKERS="TODO|Error|error:|incomplete|not a valid|FAIL"
+# Toolchain profile: explicit selection, default pin unchanged.
+BEND_PROFILE="${BEND_PROFILE:-pinned}"
+case "$BEND_PROFILE" in
+  pinned|2.0.27)   PROFILE_FILE="$SCRIPT_DIR/profiles/bend-2.0.27.sh" ;;
+  candidate|2.0.34) PROFILE_FILE="$SCRIPT_DIR/profiles/bend-2.0.34.sh" ;;
+  *)
+    echo "unknown BEND_PROFILE: '$BEND_PROFILE' (expected pinned|2.0.27|candidate|2.0.34)" >&2
+    exit 2
+    ;;
+esac
+# shellcheck source=/dev/null
+. "$PROFILE_FILE"
+PINNED_BEND_VERSION="$PROFILE_BEND_VERSION"
+PINNED_BASE_SHA256="$PROFILE_BASE_SHA256"
+CLEAN_VERDICT="$PROFILE_CLEAN_VERDICT"
+# Failure markers this profile's checker emits; their presence voids any PASS.
+FAILURE_MARKERS="$PROFILE_FAILURE_MARKERS"
 
 RUNNER_EXIT=0
 note_failure() { RUNNER_EXIT=1; }
@@ -92,10 +112,13 @@ if [ "$BASE_DIGEST" != "$PINNED_BASE_SHA256" ]; then
   exit 2
 fi
 
-echo "=== pinned toolchain (enforced) ==="
+echo "=== toolchain profile '$PROFILE_NAME' (enforced) ==="
+echo "profile     : $PROFILE_NAME ($PROFILE_FILE)"
 echo "bend version: $BEND_VERSION_LINE"
 echo "bend binary : $BEND_BIN"
 echo "base.bend   : $BASE_DIGEST  ($BASE_BEND)"
+echo "clean verdict: $CLEAN_VERDICT"
+echo "kernel expectation: $PROFILE_KERNEL_EXPECTATION"
 
 # ------------------------------------------------- snapshot identity ------
 REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null || true)"
@@ -198,9 +221,12 @@ echo
 # ------------------------------------------------- summary ----------------
 {
   echo "=== verify.sh run summary ==="
+  echo "profile     : $PROFILE_NAME ($BEND_PROFILE)"
   echo "bend version: $BEND_VERSION_LINE"
   echo "bend binary : $BEND_BIN"
   echo "base.bend   : $BASE_DIGEST  ($BASE_BEND)"
+  echo "clean verdict: $CLEAN_VERDICT"
+  echo "kernel expectation: $PROFILE_KERNEL_EXPECTATION"
   echo "revision    : $SNAP_REV"
   if [ -n "$SNAP_DIRTY" ]; then echo "dirty state : DIRTY"; else echo "dirty state : clean"; fi
   echo "checked blobs (git blob-id path):"
