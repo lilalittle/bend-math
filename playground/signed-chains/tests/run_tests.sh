@@ -1,9 +1,10 @@
 #!/bin/bash
 # tests/run_tests.sh -- regression harness for ../verify.sh.
 #
-# Reconstructs the seven fault-injection scenarios from the audit transcript
-# using controlled `bend` test doubles, runs the repaired runner against each,
-# and asserts the expected classification + runner exit code.
+# Reconstructs the nine fault-injection scenarios from the audit transcript
+# (plus two reviewer-flagged follow-ups) using controlled `bend` test
+# doubles, runs the repaired runner against each, and asserts the expected
+# classification + runner exit code.
 #
 # Usage: ./tests/run_tests.sh   (run from playground/signed-chains/)
 
@@ -24,10 +25,15 @@ case "$1" in
     printf '%s\n' "$FAKE_VERSION"
     ;;
   --help)
+    if [ "${FAKE_HELP_EXIT:-0}" != "0" ]; then
+      printf 'injected --help failure\n' >&2
+      exit "$FAKE_HELP_EXIT"
+    fi
     printf 'Bend %s: check, run, build and publish Bend programs.\n' "$FAKE_VERSION"
     if [ "${FAKE_VERDICT_FLAG:-0}" = "1" ]; then
       printf '  bend <file.bend> --verdict    kernel check\n'
     fi
+    exit 0
     ;;
   PROOF.bend)
     if [ $# -eq 1 ]; then
@@ -102,7 +108,7 @@ check() {
 
 REAL_BASE_DIGEST="90a4a9a4ec3997d7d4927d7dac04f9ddd3b884e6521ac9d691bfe6765ba0d4d7"
 
-echo "=== verify.sh regression tests (7 fault-injection scenarios) ==="
+echo "=== verify.sh regression tests (9 fault-injection scenarios) ==="
 
 # 1. baseline success
 FAKE_VERSION="bend 2.0.27" FAKE_BASE_MODE=real FAKE_VERDICT_FLAG=0 \
@@ -167,6 +173,27 @@ FAKE_ORDINARY_STDOUT='All terms check.\n' FAKE_ORDINARY_EXIT=0 \
   check wrong_toolchain 2 \
     "TOOLCHAIN MISMATCH"
 unset SKIP_EVIDENCE_CHECK
+
+# 8. bend --help itself fails -> TOOL/RESOURCE FAILURE (never UNSUPPORTED),
+#    nonzero exit
+FAKE_VERSION="bend 2.0.27" FAKE_BASE_MODE=real FAKE_VERDICT_FLAG=0 FAKE_HELP_EXIT=3 \
+FAKE_ORDINARY_STDOUT='All terms check.\n' FAKE_ORDINARY_EXIT=0 \
+  check help_command_fails 1 \
+    "ordinary: PASS (exit=0)" \
+    "kernel (--verdict): TOOL/RESOURCE FAILURE (bend --help failed, exit=3"
+# extra assertion: a failed --help is not labeled UNSUPPORTED
+if printf '%s' "$LAST_OUT" | grep -q "UNSUPPORTED"; then
+  FAIL_COUNT=$((FAIL_COUNT + 1)); printf 'FAIL  %-28s %s\n' "help_not_unsupported" "failed --help was labeled UNSUPPORTED"
+else
+  PASS_COUNT=$((PASS_COUNT + 1)); printf 'PASS  %-28s %s\n' "help_not_unsupported" "no UNSUPPORTED for failed --help"
+fi
+
+# 9. failure marker only on stderr with zero exit -> FAIL (markers are
+#    scanned on both streams, not stdout alone)
+FAKE_VERSION="bend 2.0.27" FAKE_BASE_MODE=real FAKE_VERDICT_FLAG=0 \
+FAKE_ORDINARY_STDOUT='All terms check.\n' FAKE_ORDINARY_STDERR='Error: injected failure marker on stderr\n' FAKE_ORDINARY_EXIT=0 \
+  check stderr_marker_zero_exit 1 \
+    "ordinary: FAIL (exit=0)"
 
 echo
 echo "passed: $PASS_COUNT  failed: $FAIL_COUNT"

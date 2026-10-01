@@ -8,15 +8,17 @@
 # Gate contract (ordinary):
 #   PASS requires BOTH: checker exit status 0 AND the pinned version's
 #   recognized clean verdict ("All terms check.") present in stdout, with no
-#   failure markers. Success-shaped output with nonzero exit, open-obligation
-#   (?TODO) text, and discarded diagnostics can never become PASS.
+#   failure markers on EITHER stream. Success-shaped output with nonzero exit,
+#   open-obligation (?TODO) text, and discarded diagnostics can never become PASS.
 #   Any failed required gate yields a NONZERO runner exit.
 #
 # Kernel check (--verdict):
 #   Capability is established from version/capability evidence (pinned
 #   2.0.27's --help has no --verdict flag) or a specifically recognized
-#   unknown-option diagnostic -- never from a failed execution. Crashes,
-#   timeouts, and proof failures keep their own classifications
+#   unknown-option diagnostic -- never from a failed execution. A --help
+#   invocation that itself fails is a tool/resource failure, not capability
+#   evidence, and must never fall through into the UNSUPPORTED branch.
+#   Crashes, timeouts, and proof failures keep their own classifications
 #   (tool/resource failure) and fail closed with a nonzero runner exit.
 #   UNSUPPORTED is recorded only for genuinely missing capability.
 #
@@ -129,7 +131,7 @@ ORD_EXIT="$(cat "$EVIDENCE_DIR/ordinary.exit")"
 ORDINARY_RESULT="FAIL"
 if [ "$ORD_EXIT" -eq 0 ] \
   && grep -qF "$CLEAN_VERDICT" "$EVIDENCE_DIR/ordinary.stdout" \
-  && ! grep -qE "$FAILURE_MARKERS" "$EVIDENCE_DIR/ordinary.stdout"; then
+  && ! grep -qE "$FAILURE_MARKERS" "$EVIDENCE_DIR/ordinary.stdout" "$EVIDENCE_DIR/ordinary.stderr"; then
   ORDINARY_RESULT="PASS"
 else
   note_failure
@@ -145,13 +147,21 @@ echo
 # Determine capability from version/capability evidence, NOT from a failed run.
 echo "=== kernel check: bend PROOF.bend --verdict ==="
 KERNEL_RESULT=""
-if "$BEND_BIN" --help 2>/dev/null | grep -q -- "--verdict"; then
+run_gate help "$BEND_BIN" --help
+HELP_EXIT="$(cat "$EVIDENCE_DIR/help.exit")"
+if [ "$HELP_EXIT" -ne 0 ]; then
+  # A failing --help is a tool/resource failure, not capability evidence:
+  # it must never fall through into the UNSUPPORTED branch.
+  KERNEL_RESULT="TOOL/RESOURCE FAILURE (bend --help failed, exit=$HELP_EXIT; capability undetermined)"
+  note_failure
+  echo "kernel (--verdict): $KERNEL_RESULT"
+elif grep -q -- "--verdict" "$EVIDENCE_DIR/help.stdout"; then
   KERNEL_SUPPORTED=1
 else
   KERNEL_SUPPORTED=0
 fi
 
-if [ "$KERNEL_SUPPORTED" -eq 0 ]; then
+if [ -z "$KERNEL_RESULT" ] && [ "$KERNEL_SUPPORTED" -eq 0 ]; then
   KERNEL_RESULT="UNSUPPORTED (pinned $PINNED_BEND_VERSION has no --verdict flag; established from --help, not from execution)"
   echo "kernel (--verdict): $KERNEL_RESULT"
 else
@@ -164,7 +174,7 @@ else
     echo "kernel (--verdict): $KERNEL_RESULT"
   elif [ "$K_EXIT" -eq 0 ] \
     && grep -qF "$CLEAN_VERDICT" "$EVIDENCE_DIR/kernel.stdout" \
-    && ! grep -qE "$FAILURE_MARKERS" "$EVIDENCE_DIR/kernel.stdout"; then
+    && ! grep -qE "$FAILURE_MARKERS" "$EVIDENCE_DIR/kernel.stdout" "$EVIDENCE_DIR/kernel.stderr"; then
     KERNEL_RESULT="PASS (exit=0)"
     echo "kernel (--verdict): $KERNEL_RESULT"
   else
