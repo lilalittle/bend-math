@@ -1,14 +1,13 @@
 import Base
 
-# RED phase only (bend-packages#69): physical dimensions as types.
+# GREEN (bend-packages#69): physical dimensions as types.
 #
 # The idea: a physical dimension is a vector of 7 SI base-dimension
 # exponents (m, kg, s, A, K, mol, cd). Bend has no signed integers, so we
 # keep numerator and denominator exponent vectors apart -- each is 7 Nats.
 # `is Data` makes dimensions copyable, so no affine annotations are needed.
-# Multiplying dimensions adds exponents; dividing cross-adds. A `dim_norm`
-# (cancel common factors) is specified by the laws; its real implementation
-# comes with GREEN.
+# Multiplying dimensions adds exponents; dividing cross-adds. `dim_norm`
+# cancels common factors per component, so (m/s)*s normalizes to m.
 
 type Exp7 is Data:
   E7{ m: Nat, kg: Nat, s: Nat, amp: Nat, kel: Nat, mol: Nat, cd: Nat }
@@ -44,9 +43,30 @@ def dim_div(x: Dim, y: Dim) -> Dim:
         case Dim{+yn, +yd}:
           Dim{ exp7_add(xn, yd), exp7_add(xd, yn) }
 
-# RED: normalization is specified by the laws below; implemented in GREEN.
+# GREEN: normalize by cancelling the common factor of each exponent pair:
+# (n, d) -> (n - min(n,d), d - min(n,d)).
 def dim_norm(x: Dim) -> Dim:
-  x
+  match x:
+    case Dim{+xn, +xd}:
+      match xn:
+        case E7{+nm, +nkg, +ns, +namp, +nkel, +nmol, +ncd}:
+          match xd:
+            case E7{+dm, +dkg, +ds, +damp, +dkel, +dmol, +dcd}:
+              Dim{
+                E7{ Nat.sub(nm, Nat.min(nm, dm)),
+                    Nat.sub(nkg, Nat.min(nkg, dkg)),
+                    Nat.sub(ns, Nat.min(ns, ds)),
+                    Nat.sub(namp, Nat.min(namp, damp)),
+                    Nat.sub(nkel, Nat.min(nkel, dkel)),
+                    Nat.sub(nmol, Nat.min(nmol, dmol)),
+                    Nat.sub(ncd, Nat.min(ncd, dcd)) },
+                E7{ Nat.sub(dm, Nat.min(nm, dm)),
+                    Nat.sub(dkg, Nat.min(nkg, dkg)),
+                    Nat.sub(ds, Nat.min(ns, ds)),
+                    Nat.sub(damp, Nat.min(namp, damp)),
+                    Nat.sub(dkel, Nat.min(nkel, dkel)),
+                    Nat.sub(dmol, Nat.min(nmol, dmol)),
+                    Nat.sub(dcd, Nat.min(ncd, dcd)) } }
 
 def dim_dimensionless() -> Dim:
   Dim{ exp7_zero, exp7_zero }
