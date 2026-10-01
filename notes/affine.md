@@ -24,8 +24,14 @@ way down. Note the fine print: weights summing to 1 alone does **not** keep
 the result between the inputs — weights 2 and −1 sum to 1 but give 2P−Q,
 which extrapolates past P away from Q. Staying inside the segment (the convex
 hull) additionally requires **nonnegative** weights; that's a *convex*
-combination. Bézier easing stays in [0,1] because its weights (the Bernstein
-polynomials) are nonnegative on [0,1] — not merely because they sum to 1.
+combination. For parameter values in [0,1], a Bézier curve lies in the convex
+hull of its control points — not necessarily between its endpoints. Bounding
+every control-point y-coordinate within [0,1] is sufficient to keep its
+y-values within that interval; CSS easing does not require those y-coordinate
+bounds. Counterexample: `cubic-bezier(0.25, 2, 0.75, 1)` is a valid easing
+curve, and at curve parameter 1/2 it gives input progress 1/2 but output
+progress 5/4 — a genuine overshoot, straight from the Bernstein weights
+(1/8, 3/8, 3/8, 1/8) applied to y-coordinates (0, 2, 1, 1).
 
 ## 3. Affine spaces: points vs vectors
 
@@ -51,9 +57,10 @@ duplication cost up front instead of hiding it.
 
 ## Why the rhyme matters
 
-In all four senses, "affine" removes the dangerous freedom: affine maps drop
-the fixed origin, affine combinations drop extrapolation, affine spaces drop
-point-plus-point, affine types drop uncontrolled duplication. That last one is
+In all four senses, "affine" removes a dangerous freedom: affine maps drop
+the fixed origin, affine spaces drop point-plus-point, affine types drop
+uncontrolled duplication. (Affine *combinations* keep the full story in
+section 2 above — including the fine print.) That last one is
 [why Bend is cool](why-bend-is-cool.md).
 
 ## See also
