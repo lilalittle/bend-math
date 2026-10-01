@@ -20,8 +20,12 @@ turn a circle into an ellipse without blinking.
 A weighted average whose weights **sum to 1**: t·P + (1−t)·Q. That's `lerp`.
 Bézier curves are *iterated* affine combinations (de Casteljau's algorithm) —
 CSS `cubic-bezier` easing and SVG `C` curves are affine combinations all the
-way down. The weights-summing-to-1 is what keeps the result *between* the
-inputs; it's why an easing curve stays in [0,1] instead of overshooting.
+way down. Note the fine print: weights summing to 1 alone does **not** keep
+the result between the inputs — weights 2 and −1 sum to 1 but give 2P−Q,
+which extrapolates past P away from Q. Staying inside the segment (the convex
+hull) additionally requires **nonnegative** weights; that's a *convex*
+combination. Bézier easing stays in [0,1] because its weights (the Bernstein
+polynomials) are nonnegative on [0,1] — not merely because they sum to 1.
 
 ## 3. Affine spaces: points vs vectors
 

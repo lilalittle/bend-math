@@ -3,51 +3,66 @@
 ## The old dream
 
 Write code that looks like Python; get performance that looks like CUDA —
-*without* writing threads, locks, or kernels. Every generation of languages
-has promised automatic parallelism. It kept failing for a real reason: naively
-evaluating functional programs in parallel either **duplicates shared work
-exponentially** or drowns in synchronization overhead.
+*without* writing threads, locks, or kernels. The usual price of parallelism
+is reasoning about sharing: which threads touch what, when, and whether they
+collide.
 
-## The trick, in two parts
+## The trick, as the guide tells it
 
-**Interaction nets** (Lafont, 1990): compute on a graph where each reduction
-step is *local* — it only touches neighboring nodes — and the system is
-*confluent*: if a net can reduce two different ways, both ways reach the same
-result in the same number of steps. If the order of steps doesn't matter, the
-steps can happen **simultaneously on different cores without colliding**.
-That's the entire parallelism story in one property — no locks, because local
-rewrites on a graph have nothing to race over. ([How Bend works](https://towardsdatascience.com/how-bend-works-a-parallel-programming-language-that-feels-like-python-but-scales-like-cuda-48be5bf0fc2c/))
+Bend's parallelism primitive is the **parallel call notation**:
 
-**[Affine types](affine.md)** make it *sound*. Use-at-most-once means no value
-is ever aliased: when the runtime splits work across cores, there is no shared
-state to fight over and no hidden duplication cost. Duplication still exists —
-you just ask for it with `+`, so the cost is visible in the source instead of
-lurking in the runtime. The type system *is* the thread-safety proof. (Bend is
-[affine by default](https://github.com/akitaonrails/bend-tests/blob/HEAD/docs/language-notes.md):
-a variable is used at most once; `+x` opts into reuse; `type T is Data` opts a
-type into copyability.)
+```python
+a b = pow2(p) pow2(p)  # the two calls run in parallel
+```
+
+A parallel call promises the compiler two things: the calls are **independent**,
+and they take **roughly the same time**. Then the guide says the key sentence:
+
+> *Since Bend is pure and affine, the first point always holds.*
+
+That's the whole trick, and [affine types](affine.md) are half of it. Purity
+means no side effects to collide; **affine-by-default** (use at most once)
+means no value is ever aliased behind your back. Independence isn't something
+you have to establish — the type system already did. The second promise,
+balanced workload, is yours to keep.
+
+Underneath is "a contention-free, binary fork-join machine": every task is
+handed to a core exactly once and never moved afterwards — fast and
+GPU-friendly, but you must keep the work balanced. A `!` after a function name
+(`pow2!(20n)`) hands that call and every parallel call inside it to the GPU,
+with a unified heap (zero-cost CPU↔GPU moves on unified-memory chips).
+
+Sharing is explicit and priced: a `+` value read by every lane costs an atomic
+per read. The type system doesn't just prevent data races — it puts the cost
+of sharing in the source where you can see it.
 
 ## What it feels like
 
-`a b = f(x) g(y)` forks two calls across CPU cores. `f!(x)` sends the call —
-and the parallel calls under it — to the GPU. You write ordinary-looking
-functional code (pattern matching, recursion, ADTs) and the pipeline
-(Bend → HVM, the interaction-net runtime → C/CUDA) parallelizes whatever can
-be parallelized. Same program, CPU or GPU, zero kernels written by you.
+You write ordinary-looking functional code — pattern matching, recursion,
+ADTs — and mark what's parallel with juxtaposition (`a b = ...`) and `!`.
+Same program, CPU or GPU, zero kernels written. The JavaScript target just
+runs sequentially (it's the fast-dev target, not the fast-run target).
 
 ## The honest caveats
 
-- Parallelism needs *balanced* work — forking two trivial calls gains nothing.
-- Values are affine: closures and arrays can't be freely shared across threads
-  (experimental `@unsafe` sharing exists).
-- On this VM, `bend run` executes single-threaded (the `bend` binary is
-  Node-based); real multicore needs compiled C via clang 14+.
+- The independence promise is free; the *balance* promise is yours. Fork two
+  uneven calls and the speedup is sub-ideal. Divergent work (n-queens) stays
+  faster on CPU; uniform numeric work (mandelbrot, nbody) shines on GPU.
+- Values are affine: closures and arrays can't be freely shared across lanes.
+- `bend run` on this VM executes single-threaded (the `bend` binary is
+  Node-based); real multicore/GPU needs a native compile via clang 14+.
 - Bend 2 is young: verbose (everything annotated, nothing inferred), a small
   Base library, and a young compiler with blind spots.
 
-The bet, stated plainly: affine types buy parallelism you don't have to think
-about, and [machine-checked laws](rgr-loop.md) buy refactoring you don't have
-to fear. No other language offers that combination.
+The bet, stated plainly: affine types buy parallelism whose safety you don't
+have to think about (and whose sharing costs you can see), and
+[machine-checked laws](rgr-loop.md) buy refactoring you don't have to fear.
+No other language offers that combination.
+
+*Source: `bend guide` (Bend 2.0.27), "Parallelism" section. An earlier version
+of this note described a Bend → HVM → C/CUDA pipeline from the Bend 1 era;
+the Bend 2 guide describes the fork-join model above, so the note was
+rewritten.*
 
 ## See also
 
