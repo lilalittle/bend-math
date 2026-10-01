@@ -21,10 +21,14 @@ it's just never been called by its real names.
    brute force is honest motivation for proof automation.
    ([issue](https://github.com/lilalittle/bend-packages/issues/68))
 3. **Physical dimensions and units** — dimensional analysis as type-checking.
-   🔴 RED started: [`playground/units/`](../playground/units/) — dimensions as
-   7-exponent SI vectors (num/den Nat pairs, `is Data`), four laws stated
-   (`?TODO`), including (m/s)·s = m via a specified-but-unimplemented
-   `dim_norm`. GREEN is the next session's work.
+   🟢 GREEN, 🔵 refactored: [`playground/units/`](../playground/units/) —
+   dimensions as 7-exponent SI vectors (num/den Nat pairs, `is Data`),
+   all four laws proved: the monoid laws via verified `Nat.add` comm/assoc
+   (proved by induction, lifted componentwise to `Exp7`/`Dim` in
+   `Algebra.bend`), and (m/s)·s = m *by computation* — `dim_norm` cancels
+   the seconds so both sides reduce to the same term. Bonus extracted:
+   the reusable verified-Nat lemmas, seed for rung 5.
+   ([note](units.md))
    ([issue](https://github.com/lilalittle/bend-packages/issues/69))
 4. **[The divergence theorem](divergence-theorem.md)** (discrete) — what Stokes
    says, finitely. Turns the RCCM boundary gap into a failing law.
