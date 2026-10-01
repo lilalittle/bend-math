@@ -20,6 +20,20 @@ it's just never been called by its real names.
    cycle; the algebra lemmas extracted to `Algebra.bend`. The 64-case
    brute force is honest motivation for proof automation.
    ([issue](https://github.com/lilalittle/bend-packages/issues/68))
+2.5. **[Signed chains](signed-chains.md)** — the F2 blind-spot fix. Mod 2, a
+   flipped incidence sign is invisible, so the rungs above prove the wrong
+   thing for every claim meant to transfer. 🟢 GREEN, 🔵 refactored:
+   [`playground/signed-chains/`](../playground/signed-chains/) — chains on
+   the triangle over exact integers (difference pairs; Base has no signed
+   type), `d² = 0` proved about the actual boundary constructors, plus two
+   controls: consistent reorientation preserves the identity, and the
+   inconsistent-incidence mutant yields the checked nonzero residual
+   `2[2]−2[0]` -- which vanishes when the *same* construction is reduced
+   mod 2. The `Z` group laws live standalone in `Algebra.bend` (imports
+   only Base), proved by structural induction with no enumeration; the
+   one reproducible command is `verify.sh`, which reports the ordinary
+   gate and the (unsupported in bend 2.0.27) kernel check separately.
+   ([issue](https://github.com/lilalittle/bend-packages/issues/67))
 3. **Physical dimensions and units** — dimensional analysis as type-checking.
    🟢 GREEN, 🔵 refactored: [`playground/units/`](../playground/units/) —
    dimensions as 7-exponent SI vectors (num/den Nat pairs, `is Data`),

@@ -1,0 +1,14 @@
+=== pinned toolchain ===
+bend version: bend 2.0.27
+bend binary : /home/hatch/.bend/bin/bend
+base.bend   : 90a4a9a4ec3997d7d4927d7dac04f9ddd3b884e6521ac9d691bfe6765ba0d4d7  (/home/hatch/.bend/bend2/base.bend)
+bend-math   : 01d3abc
+
+=== ordinary gate: bend PROOF.bend ===
+All terms check.
+ordinary: PASS
+
+=== kernel check: bend PROOF.bend --verdict ===
+bend: unknown option --verdict (see bend --help)
+kernel (--verdict): UNSUPPORTED by pinned toolchain (bend 2.0.27 has no --verdict flag)
+  -> recorded as unsupported, NOT as passed. Ordinary checking above is the only gate.
